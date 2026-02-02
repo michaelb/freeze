@@ -19,3 +19,4 @@ frozone-derive = { path = "../frozone-derive", version = "0.1.0" }
 
 [dev-dependencies]
 static_assertions = "1.1.0"
+frozone-derive = { path = "../frozone-derive", features = ["test"] }

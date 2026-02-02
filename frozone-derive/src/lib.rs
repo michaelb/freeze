@@ -18,8 +18,8 @@ pub fn derive_freezable(input: TokenStream) -> TokenStream {
 
 fn derive_freezable_enum(
     data: syn::DataEnum,
-    _name: &syn::Ident,
-    _generics: (
+    name: &syn::Ident,
+    generics: (
         syn::ImplGenerics,
         syn::TypeGenerics,
         Option<&syn::WhereClause>,
@@ -31,50 +31,55 @@ fn derive_freezable_enum(
         if f.discriminant.is_some() {
             panic!("enum variants discriminants are not supported yet");
         }
-        let variant_fields = f.fields.members();
+        let variant_fields = f.fields.iter().map(|g| {
+            let g_ty = &g.ty;
+            quote! {
+                <#g_ty as frozone::Freezable>::freeze()
+            }
+        });
+
         quote! {
             (stringify!(#name), {
                 let mut hasher = core::hash::SipHasher::new();
-                [#(#variant_fields,)*].iter().for_each(|x| {
-                    if let Some(ident) = x.ident { // fields struct may have no name (e.g. tuple structs)
-                        x.hash(&mut hasher);
-                    }
-                    <x.ty as frozone::Freezable>::freeze().hash(&mut hasher);
+
+                [#(#variant_fields,)*].iter().for_each(|x: &u64| {
+                    x.hash(&mut hasher);
                 });
                 hasher.finish()
             })
         }
     });
-    let _ = variants_names_and_freezes;
 
-    // for v in variants_names_and_freezes {
+    // #[cfg(feature = "test")]
+    // for v in variants_names_and_freezes.clone() {
+    //     println!("here");
     //     print!("variants => {}", pretty_print(&v));
+    //     println!("\nhere - end");
     // }
-    quote! { 1}.into()
-    // let (impl_generics, type_generics, where_clause) = generics;
-    // let generated = quote! {
-    //     impl #impl_generics frozone::Freezable for #name #type_generics #where_clause {
-    //         fn freeze() -> u64 {
-    //             use core::hash::{Hash, Hasher};
-    //
-    //             let mut hasher = core::hash::SipHasher::new();
-    //             // stringify!( [#(#fields,)*]);
-    //             [#(#variants_names_and_freezes,)*].iter().for_each(|x| {
-    //                 x.0.hash(&mut hasher);
-    //                 x.1.hash(&mut hasher);
-    //             });
-    //             hasher.finish()
-    //         }
-    //     }
-    // };
-    // let g: proc_macro2::TokenStream = generated.into();
-    // // #[cfg(test)]
-    // // {
+    let (impl_generics, type_generics, where_clause) = generics;
+    let generated = quote! {
+        impl #impl_generics frozone::Freezable for #name #type_generics #where_clause {
+            fn freeze() -> u64 {
+                use core::hash::{Hash, Hasher};
+
+                let mut hasher = core::hash::SipHasher::new();
+                [#(#variants_names_and_freezes,)*].iter().for_each(|x| {
+                    x.0.hash(&mut hasher);
+                    x.1.hash(&mut hasher);
+                });
+                hasher.finish()
+            }
+        }
+    };
+    let g: proc_macro2::TokenStream = generated.into();
+    // #[cfg(test)]
+    // {
+    #[cfg(feature = "test")]
     // print!("AST => {}", pretty_print(&g));
-    // g.into()
-    // // }
-    // // #[cfg(not(test))]
-    // // g
+    g.into()
+    // }
+    // #[cfg(not(test))]
+    // g
 }
 
 fn derive_freezable_struct(
@@ -114,3 +119,12 @@ fn derive_freezable_struct(
 
     generated.into()
 }
+
+// #[cfg(feature = "test")]
+// fn pretty_print(ts: &proc_macro2::TokenStream) -> String {
+//     let file = match syn::parse_file(&ts.to_string()) {
+//         Ok(f) => f,
+//         Err(e) => return format!("error parsing tokenstream: {e:?}"),
+//     };
+//     prettyplease::unparse(&file)
+// }

@@ -85,13 +85,14 @@ fn derive_ptr() {
     }
     assert_eq!(MyType::freeze(), 12713665718889934710);
 }
-// #[test]
-// fn derive_enum() {
-//     #[derive(Freezable)]
-//     enum MyType {
-//         Unit,
-//         Unnamed(u64),
-//         // Unnamed2(u64, u32, u64),
-//     }
-//     assert_eq!(MyType::freeze(), 12713665718889934710);
-// }
+
+#[test]
+fn derive_enum() {
+    #[derive(Freezable)]
+    enum MyType {
+        Unit,
+        Unnamed(u64),
+        Unnamed2(u64, u32, u64),
+    }
+    assert_eq!(MyType::freeze(), 13938101513925945732);
+}
