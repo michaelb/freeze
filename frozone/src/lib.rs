@@ -18,7 +18,7 @@ pub trait Freezable {
     /// Computes a 'hash of the type, subtypes, field names etc...'
     /// If the freeze doesn't change, you can be sure that the structure
     /// will have the same fields, serialize/deserialize to/from the same string
-    /// (assuming your serializer itself doesn't change ofc) ...
+    /// (assuming your serializer itself doesn't change of course) ...
     fn freeze() -> u64 {
         let mut ctx = FreezeCtx::default();
         Self::freeze_with_context(&mut ctx)
@@ -28,7 +28,7 @@ pub trait Freezable {
     /// /sub-structures have changed since last version), this function
     /// prints (std::println!) frozone hashes along the structure's definition
     #[cfg(feature = "std")]
-    fn display() {
+    fn display_freeze() {
         let mut ctx = FreezeCtx {
             cache: Vec::new(),
             depth: 0,

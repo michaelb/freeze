@@ -84,7 +84,7 @@ struct Power {
 
 fn main() {
     /// call the associated method `::freeze()` on your structure, and
-    /// compare it to the fixed value it evaluated to
+    /// compare it to the fixed value it evaluated to "at release time"
     assert_eq!(Frozone::freeze(),  12298013273002774775); // frozone hash from v1 release
     /// .. okay, `Frozone` has not changed since v1
 }

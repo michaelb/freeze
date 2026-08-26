@@ -884,5 +884,5 @@ fn display() {
         YetAnotherVariant(Option<Option<u8>>, u64),
         YouGetIt(MySubType5, MySubType3),
     }
-    MyType::display();
+    MyType::display_freeze();
 }
