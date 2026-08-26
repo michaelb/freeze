@@ -1,3 +1,8 @@
+## v0.5.0
+
+- rename display() to display_freeze()
+- fix frozone-derive being always pulled with "std" feature
+
 ## v0.4.2
 
 - remove dependency on heapless
